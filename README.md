@@ -26,7 +26,7 @@ const { svgRef, globalBox, deleteBox } = useAnnotation({});
 
 <template>
   <div>
-    <button>Box Delete Button</button>
+    <button @click="deleteBox">Box Delete Button</button>
     <svg
       ref="svgRef"
       :width="200"
