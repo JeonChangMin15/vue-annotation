@@ -1,8 +1,8 @@
 # Simple Vue Annotation for Vue3 Composition api
 
 ### Example
-![annotation](https://github.com/JeonChangMin15/vue-annotation/assets/89255072/fdea21da-ea02-4ac2-951e-71078f7c3bd0)
 
+![annotation](https://github.com/JeonChangMin15/vue-annotation/assets/89255072/fdea21da-ea02-4ac2-951e-71078f7c3bd0)
 
 ### Features
 
@@ -42,26 +42,12 @@ const { svgRef, globalBox, deleteBox } = useAnnotation({});
 
 ### useAnnotation Props
 
-```javascript
-interface Props {
-  boxStrokeWidth?: number;
-  boxStrokeColor?: string;
-  boxFillColor?: string;
-  boxFillOpacity?: number;
-  circleRadius?: number;
-  circleFillColor?: string;
-  circleStrokeColor?: string;
-}
-```
-
-### Default Value of Props
-
-```javascript
-const boxStrokeWidth = 1;
-const boxStrokeColor = "blue";
-const boxStrokeColor = "#FFCCCC";
-const boxFillOpacity = 0.4;
-const circleRadius = 6;
-const circleFillColor = "red";
-const circleStrokeColor = "black";
-```
+| Props             | Type   | Default |
+| ----------------- | ------ | ------- |
+| boxStrokeWidth    | number | 1       |
+| boxStrokeColor    | string | blue    |
+| boxFillColor      | string | #FFCCCC |
+| boxFillOpacity    | number | 0.4     |
+| circleRadius      | number | 6       |
+| circleFillColor   | string | red     |
+| circleStrokeColor | string | black   |
