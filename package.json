@@ -1,6 +1,6 @@
 {
   "name": "vue-annotation",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "private": false,
   "type": "module",
   "main": "dist/vue-simple-annotation.umd.cjs",
@@ -14,17 +14,20 @@
     }
   },
   "author": {
-    "name": "Mr.jeon",
-    "email": "cckdals222@gmail.com"
+    "name": "Mr.Jeon",
+    "email": "devjerrypro@gmail.com"
   },
   "keywords": [
     "vue",
-    "Bbox",
+    "vue3",
     "annotation",
-    "vue3"
+    "labeling",
+    "draggable",
+    "resize",
+    "simple"
   ],
   "bugs": {
-    "email": "cckdals222@gmail.com"
+    "email": "devjerrypro@gmail.com"
   },
   "files": [
     "dist"
