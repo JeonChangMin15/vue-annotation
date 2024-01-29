@@ -2,7 +2,7 @@
 import { ref, onMounted, reactive, watch } from "vue";
 import { useAnnotation } from "@/hooks/useAnnotation";
 
-const { svgRef, deleteBox, store } = useAnnotation();
+const { svgRef, deleteBox } = useAnnotation({});
 const imageSize = reactive({ width: 0, height: 0 });
 const imageRef = ref<HTMLImageElement | null>(null);
 

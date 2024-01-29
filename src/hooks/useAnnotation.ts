@@ -2,8 +2,6 @@ import { ref, onMounted, reactive, onUnmounted } from "vue";
 import { useMouseInElement } from "@vueuse/core";
 import { throttle } from "lodash";
 import * as d3 from "d3";
-import { useRectStore } from "@/stores/rect";
-import { useBoxStore } from "@/stores/box";
 
 interface Circle {
   x: number;
@@ -13,16 +11,42 @@ interface Circle {
   id: number;
 }
 
+interface Rect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  id: number;
+}
+
 type ChangePosition = "leftUp" | "leftDown" | "rightUp" | "rightDown" | "";
 
-export const useAnnotation = () => {
-  const BOX_STROKE_WIDTH = 1;
-  const BOX_STROKE_COLOR = "blue";
-  const BOX_FILL_COLOR = "#FFCCCC";
-  const BOX_FILL_OPACITY = 0.4;
-  const CIRCLE_RADIUS = 6;
-  const CIRCLE_FILL_COLOR = "red";
-  const CIRCLE_STROKE_COLOR = "black";
+interface Props {
+  boxStrokeWidth?: number;
+  boxStrokeColor?: string;
+  boxFillColor?: string;
+  boxFillOpacity?: number;
+  circleRadius?: number;
+  circleFillColor?: string;
+  circleStrokeColor?: string;
+}
+
+export const useAnnotation = ({
+  boxFillColor,
+  boxFillOpacity,
+  boxStrokeColor,
+  boxStrokeWidth,
+  circleFillColor,
+  circleRadius,
+  circleStrokeColor,
+}: Props) => {
+  const BOX_STROKE_WIDTH = boxStrokeWidth ? boxStrokeWidth : 1;
+  const BOX_STROKE_COLOR = boxStrokeColor ? boxStrokeColor : "blue";
+  const BOX_FILL_COLOR = boxFillColor ? boxFillColor : "#FFCCCC";
+  const BOX_FILL_OPACITY = boxFillOpacity ? boxFillOpacity : 0.4;
+  const CIRCLE_RADIUS = circleRadius ? circleRadius : 6;
+  const CIRCLE_FILL_COLOR = circleFillColor ? circleFillColor : "red";
+  const CIRCLE_STROKE_COLOR = circleStrokeColor ? circleStrokeColor : "black";
 
   const startPosition = reactive({ x: 0, y: 0 });
   const svgRef = ref<SVGAElement | null>(null);
@@ -31,10 +55,24 @@ export const useAnnotation = () => {
   const isWidthHeightChanged = ref(false);
   const changePosition = ref<ChangePosition>("");
 
-  const store = useBoxStore();
-  const rectStore = useRectStore();
-
+  const globalBox = reactive<Rect[]>([]);
+  const globalRectCount = ref(1);
   const { elementX, elementY } = useMouseInElement(svgRef);
+
+  const addBox = (rect: Rect) => {
+    globalBox.push(rect);
+  };
+
+  const deleteBoxStore = (id: number) => {
+    const index = globalBox.findIndex((box) => box.id === id);
+    if (index !== -1) {
+      globalBox.splice(index, 1);
+    }
+  };
+
+  const increment = () => {
+    globalRectCount.value++;
+  };
 
   const deleteBox = () => {
     if (selectedBoxId.value === null) return;
@@ -44,12 +82,12 @@ export const useAnnotation = () => {
     );
 
     d3.select(`#rect-${selectedBoxId.value}`).remove();
-    store.deleteBoxStore(selectedBoxId.value);
+    deleteBoxStore(selectedBoxId.value);
     selectedBoxId.value = null;
   };
 
   const checkBoxArea = (curX: number, curY: number) => {
-    for (const { x, y, width, height, id } of store.globalBox) {
+    for (const { x, y, width, height, id } of globalBox) {
       const isMouseInBox =
         curX > x - CIRCLE_RADIUS &&
         curX < x + width + CIRCLE_RADIUS &&
@@ -146,9 +184,9 @@ export const useAnnotation = () => {
 
   // store에 저장된 rect를 먼저 그려주는 함수
   const drawPrevRect = () => {
-    if (!store.globalBox.length) return;
+    if (!globalBox.length) return;
 
-    store.globalBox.forEach(({ x, y, width, height, id }) => {
+    globalBox.forEach(({ x, y, width, height, id }) => {
       d3.select(svgRef.value)
         .append("rect")
         .attr("id", `rect-${id}`)
@@ -189,17 +227,17 @@ export const useAnnotation = () => {
     const isBoxArea = checkBoxArea(startPosition.x, startPosition.y);
 
     if (isBoxArea) {
-      store.globalBox.forEach(({ id }) => fillSelectedBox(id));
+      globalBox.forEach(({ id }) => fillSelectedBox(id));
       return;
     } else {
-      store.globalBox.forEach(({ id }) =>
+      globalBox.forEach(({ id }) =>
         d3.select(`#rect-${id}`).attr("fill-opacity", 0)
       );
     }
 
     d3.select(svgRef.value)
       .append("rect")
-      .attr("id", `rect-${rectStore.globalRectCount}`)
+      .attr("id", `rect-${globalRectCount.value}`)
       .attr("x", startPosition.x)
       .attr("y", startPosition.y)
       .attr("width", 0)
@@ -235,7 +273,7 @@ export const useAnnotation = () => {
   const selectedBoxMove = () => {
     if (!isClicked.value || selectedBoxId.value === null) return;
 
-    const info = store.globalBox.filter((v) => v.id === selectedBoxId.value)[0];
+    const info = globalBox.filter((v) => v.id === selectedBoxId.value)[0];
 
     // 선택한 박스의 너비, 높이를 조절할때 적용되는 코드
     if (
@@ -316,7 +354,7 @@ export const useAnnotation = () => {
     if (!isClicked.value || selectedBoxId.value !== null) return;
 
     // 새로운 박스를 생성하는 코드
-    d3.select(`#rect-${rectStore.globalRectCount}`)
+    d3.select(`#rect-${globalRectCount.value}`)
       .attr("width", Math.abs(startPosition.x - elementX.value))
       .attr("height", Math.abs(startPosition.y - elementY.value))
       .attr("x", Math.min(startPosition.x, elementX.value))
@@ -327,22 +365,21 @@ export const useAnnotation = () => {
   const selectedBoxMouseUp = () => {
     if (selectedBoxId.value === null) return;
 
-    const index = store.globalBox.findIndex(
+    const index = globalBox.findIndex(
       (rect) => rect.id === selectedBoxId.value
     );
     if (index === -1) return;
 
     // 높이 너비 조절한 경우 전역스토어 저장하는 코드
     if (isWidthHeightChanged.value && changePosition.value === "rightDown") {
-      const width =
-        store.globalBox[index].width + (elementX.value - startPosition.x);
+      const width = globalBox[index].width + (elementX.value - startPosition.x);
       const height =
-        store.globalBox[index].height + (elementY.value - startPosition.y);
-      const x = width > 0 ? store.globalBox[index].x : elementX.value;
-      const y = height > 0 ? store.globalBox[index].y : elementY.value;
+        globalBox[index].height + (elementY.value - startPosition.y);
+      const x = width > 0 ? globalBox[index].x : elementX.value;
+      const y = height > 0 ? globalBox[index].y : elementY.value;
 
-      store.globalBox[index] = {
-        ...store.globalBox[index],
+      globalBox[index] = {
+        ...globalBox[index],
         width: Math.abs(width),
         height: Math.abs(height),
         x,
@@ -351,18 +388,17 @@ export const useAnnotation = () => {
     }
 
     if (isWidthHeightChanged.value && changePosition.value === "rightUp") {
-      const width =
-        store.globalBox[index].width + (elementX.value - startPosition.x);
+      const width = globalBox[index].width + (elementX.value - startPosition.x);
       const height =
-        store.globalBox[index].height - (elementY.value - startPosition.y);
-      const x = width > 0 ? store.globalBox[index].x : elementX.value;
+        globalBox[index].height - (elementY.value - startPosition.y);
+      const x = width > 0 ? globalBox[index].x : elementX.value;
       const y =
         height > 0
           ? elementY.value
-          : store.globalBox[index].y + store.globalBox[index].height;
+          : globalBox[index].y + globalBox[index].height;
 
-      store.globalBox[index] = {
-        ...store.globalBox[index],
+      globalBox[index] = {
+        ...globalBox[index],
         width: Math.abs(width),
         height: Math.abs(height),
         x,
@@ -371,18 +407,17 @@ export const useAnnotation = () => {
     }
 
     if (isWidthHeightChanged.value && changePosition.value === "leftDown") {
-      const width =
-        store.globalBox[index].width - (elementX.value - startPosition.x);
+      const width = globalBox[index].width - (elementX.value - startPosition.x);
       const height =
-        store.globalBox[index].height + (elementY.value - startPosition.y);
+        globalBox[index].height + (elementY.value - startPosition.y);
       const x =
         width > 0
           ? elementX.value
-          : store.globalBox[index].x + store.globalBox[index].width;
-      const y = height > 0 ? store.globalBox[index].y : elementY.value;
+          : globalBox[index].x + globalBox[index].width;
+      const y = height > 0 ? globalBox[index].y : elementY.value;
 
-      store.globalBox[index] = {
-        ...store.globalBox[index],
+      globalBox[index] = {
+        ...globalBox[index],
         width: Math.abs(width),
         height: Math.abs(height),
         x,
@@ -391,21 +426,20 @@ export const useAnnotation = () => {
     }
 
     if (isWidthHeightChanged.value && changePosition.value === "leftUp") {
-      const width =
-        store.globalBox[index].width - (elementX.value - startPosition.x);
+      const width = globalBox[index].width - (elementX.value - startPosition.x);
       const height =
-        store.globalBox[index].height - (elementY.value - startPosition.y);
+        globalBox[index].height - (elementY.value - startPosition.y);
       const x =
         width > 0
           ? elementX.value
-          : store.globalBox[index].x + store.globalBox[index].width;
+          : globalBox[index].x + globalBox[index].width;
       const y =
         height > 0
           ? elementY.value
-          : store.globalBox[index].y + store.globalBox[index].height;
+          : globalBox[index].y + globalBox[index].height;
 
-      store.globalBox[index] = {
-        ...store.globalBox[index],
+      globalBox[index] = {
+        ...globalBox[index],
         width: Math.abs(width),
         height: Math.abs(height),
         x,
@@ -415,10 +449,10 @@ export const useAnnotation = () => {
 
     // 위치를 조절한 경우 전역스토어에 저장하는 코드
     if (!isWidthHeightChanged.value) {
-      store.globalBox[index] = {
-        ...store.globalBox[index],
-        x: store.globalBox[index].x + (elementX.value - startPosition.x),
-        y: store.globalBox[index].y + (elementY.value - startPosition.y),
+      globalBox[index] = {
+        ...globalBox[index],
+        x: globalBox[index].x + (elementX.value - startPosition.x),
+        y: globalBox[index].y + (elementY.value - startPosition.y),
       };
     }
 
@@ -435,7 +469,7 @@ export const useAnnotation = () => {
     const width = Math.abs(startPosition.x - elementX.value);
     const height = Math.abs(startPosition.y - elementY.value);
 
-    d3.select(`#rect-${rectStore.globalRectCount}`)
+    d3.select(`#rect-${globalRectCount.value}`)
       .attr("width", width)
       .attr("height", height)
       .attr("x", x)
@@ -443,12 +477,12 @@ export const useAnnotation = () => {
 
     // 단순 클릭했을때 rect 생성방지코드
     if (width > 5 && height > 5) {
-      store.addBox({ x, y, width, height, id: rectStore.globalRectCount });
-      drawCircles({ x, y, width, height, id: rectStore.globalRectCount });
-    } else d3.select(`#rect-${rectStore.globalRectCount}`).remove();
+      addBox({ x, y, width, height, id: globalRectCount.value });
+      drawCircles({ x, y, width, height, id: globalRectCount.value });
+    } else d3.select(`#rect-${globalRectCount.value}`).remove();
 
     isClicked.value = false;
-    rectStore.increment();
+    increment();
   };
 
   const selectedBoxMoveEvent = throttle(selectedBoxMove, 10); // 10ms throttle
@@ -472,5 +506,5 @@ export const useAnnotation = () => {
     svgRef.value?.removeEventListener("mouseup", newBoxMouseUp);
   });
 
-  return { svgRef, deleteBox, store };
+  return { svgRef, deleteBox, globalBox };
 };
