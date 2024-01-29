@@ -1,5 +1,9 @@
 # Simple Vue Annotation for Vue3 Composition api
 
+### Example
+![annotation](https://github.com/JeonChangMin15/vue-annotation/assets/89255072/fdea21da-ea02-4ac2-951e-71078f7c3bd0)
+
+
 ### Features
 
 - Draggable and Resizeable
