@@ -1,11 +1,12 @@
 {
   "name": "vue-annotation",
-  "version": "0.0.10",
+  "version": "0.1.0",
   "private": false,
   "type": "module",
   "main": "dist/vue-simple-annotation.umd.cjs",
   "module": "dist/vue-simple-annotation.js",
   "types": "dist/index.d.ts",
+  "description": "Draw Rect, Bbox, Annotation, Labeling Library For Vue3 Composition api",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -13,6 +14,7 @@
       "require": "./dist/vue-simple-annotation.umd.cjs"
     }
   },
+  "homepage": "https://github.com/JeonChangMin15/vue-annotation",
   "author": {
     "name": "Mr.Jeon",
     "email": "devjerrypro@gmail.com"

@@ -14,7 +14,7 @@ npm i vue-annotation
 
 ### How To Use
 
-```
+```javascript
 <script setup lang="ts">
 import { useAnnotation } from "vue-annotation";
 const { svgRef, globalBox, deleteBox } = useAnnotation({});
@@ -52,12 +52,12 @@ interface Props {
 
 ### Default Value of Props
 
-```
-boxStrokeWidth = 1
-boxStrokeColor = 'blue'
-boxStrokeColor =  "#FFCCCC"
-boxFillOpacity = 0.4
-circleRadius = 6
-circleFillColor = 'red'
-circleStrokeColor = 'black'
+```javascript
+const boxStrokeWidth = 1;
+const boxStrokeColor = "blue";
+const boxStrokeColor = "#FFCCCC";
+const boxFillOpacity = 0.4;
+const circleRadius = 6;
+const circleFillColor = "red";
+const circleStrokeColor = "black";
 ```
