@@ -28,7 +28,7 @@ const { svgRef, globalBox, deleteBox } = useAnnotation({});
       :width="200"
       :height="200"
     >
-      <image ref="imageRef" href="/src/assets/images/chiwa.jpg" />
+      <image href="/src/assets/images/chiwa.jpg" />
     </svg>
   </div>
 </template>
