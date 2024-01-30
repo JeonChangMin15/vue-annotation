@@ -1,6 +1,6 @@
 {
   "name": "vue-annotation",
-  "version": "0.2.2",
+  "version": "0.2.4",
   "private": false,
   "type": "module",
   "main": "dist/vue-simple-annotation.umd.cjs",
@@ -28,6 +28,7 @@
     "resize",
     "simple"
   ],
+  "license": "MIT",
   "bugs": {
     "email": "devjerrypro@gmail.com"
   },
