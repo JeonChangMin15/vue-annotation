@@ -20,8 +20,14 @@ npm i vue-annotation
 
 ```javascript
 <script setup lang="ts">
+import { watch } from "vue";
 import { useAnnotation } from "vue-annotation";
-const { svgRef, globalBox, deleteBox } = useAnnotation({});
+const { svgRef, globalBox, deleteBox } = useAnnotation({ boxStrokeWidth: 2 });
+
+// if want to see box infos, write this code
+watch(globalBox, () => {
+  console.log(globalBox);
+});
 </script>
 
 <template>

@@ -2,7 +2,7 @@
 import { ref, onMounted, reactive, watch } from "vue";
 import { useAnnotation } from "@/hooks/useAnnotation";
 
-const { svgRef, deleteBox } = useAnnotation({});
+const { svgRef, deleteBox, globalBox } = useAnnotation({ boxStrokeWidth: 2 });
 const imageSize = reactive({ width: 0, height: 0 });
 const imageRef = ref<HTMLImageElement | null>(null);
 
@@ -13,6 +13,10 @@ onMounted(() => {
     imageSize.height = img.naturalHeight;
   };
   img.src = "/src/assets/images/chiwa.jpg";
+});
+
+watch(globalBox, () => {
+  console.log(globalBox[0]);
 });
 </script>
 

@@ -1,6 +1,6 @@
 {
   "name": "vue-annotation",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "private": false,
   "type": "module",
   "main": "dist/vue-simple-annotation.umd.cjs",
